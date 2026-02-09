@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Secret Feast 🐾</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #f6d1ec; font-family: 'Segoe UI', cursive, sans-serif; transition: opacity 1.2s; }
+        
+        #ui-top {
+            position: absolute; top: 20px; width: 100%; text-align: center;
+            color: #ff1493; font-size: 32px; font-weight: bold; pointer-events: none; z-index: 100;
+            text-shadow: 1px 1px white;
+        }
+
+        #personal-note {
+            position: absolute; bottom: 120px; width: 100%; text-align: center;
+            color: #ff1493; font-size: 1.3rem; font-style: italic;
+            padding: 0 20px; line-height: 1.4; z-index: 100;
+        }
+
+        .btn-container {
+            position: absolute; bottom: 40px; width: 100%; text-align: center; z-index: 200;
+        }
+
+        /* Deep Pink Styling for Buttons */
+        .leave-btn {
+            padding: 15px 40px; border: none; border-radius: 50px; 
+            background: #ff1493; color: white; font-weight: bold; font-size: 1.1rem;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
+        }
+        .leave-btn:hover { transform: scale(1.1); background: #c71585; box-shadow: 0 6px 20px rgba(255, 20, 147, 0.5); }
+
+        #final-msg {
+            position: fixed; inset: 0; background: white; display: none; 
+            align-items: center; justify-content: center;
+            color: #ff1493; font-size: 2.2rem; z-index: 1000; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-top">The Party is On! 🐾</div>
+    
+    <div id="personal-note">
+        "I tried to make it puppies and cats but it is changed... <br> hope you still like these squishy friends!"
+    </div>
+
+    <div class="btn-container">
+        <button class="leave-btn" onclick="exitParty()">Leave the party i got you !</button>
+    </div>
+
+    <div id="final-msg">Party Session Ended. <br> Have a beautiful birthday! ✨</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, mainGroup, pets = [];
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+            const light = new THREE.PointLight(0xffffff, 0.8);
+            light.position.set(5, 15, 10);
+            scene.add(light);
+
+            mainGroup = new THREE.Group();
+            scene.add(mainGroup);
+
+            // TABLE & CLOTH
+            const tableGeo = new THREE.CylinderGeometry(4.5, 4.5, 0.5, 32);
+            const tableTop = new THREE.Mesh(tableGeo, new THREE.MeshStandardMaterial({ color: 0xffffff }));
+            mainGroup.add(tableTop);
+
+            const cloth = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 0.2, 32), new THREE.MeshStandardMaterial({ color: 0xffd1dc }));
+            cloth.position.y = 0.3;
+            mainGroup.add(cloth);
+
+            // CAKE
+            const loader = new THREE.TextureLoader();
+            const cakeMap = loader.load('https://img.icons8.com/plasticine/200/birthday-cake.png');
+            const cake = new THREE.Sprite(new THREE.SpriteMaterial({ map: cakeMap }));
+            cake.scale.set(3.5, 3.5, 1);
+            cake.position.set(0, 2.3, 0); 
+            mainGroup.add(cake);
+
+            function createChar(type, color, x, z, scale = 1) {
+                const group = new THREE.Group();
+                const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6 });
+                
+                const body = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), mat);
+                group.add(body);
+
+                const head = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 32), mat);
+                head.position.set(0, 1.3, 0.3);
+                group.add(head);
+
+                // Big Cartoon Eyes
+                [-0.35, 0.35].forEach(posX => {
+                    const ew = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), new THREE.MeshBasicMaterial({color: 0xffffff}));
+                    ew.position.set(posX, 1.4, 1.2);
+                    group.add(ew);
+                    const ep = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), new THREE.MeshBasicMaterial({color: 0x000000}));
+                    ep.position.set(posX, 1.4, 1.35);
+                    group.add(ep);
+                });
+
+                if (type === 'cat') {
+                    const ear = new THREE.ConeGeometry(0.4, 0.8, 4);
+                    const eL = new THREE.Mesh(ear, mat); eL.position.set(-0.7, 2.0, 0.3);
+                    const eR = new THREE.Mesh(ear, mat); eR.position.set(0.7, 2.0, 0.3);
+                    group.add(eL, eR);
+                } else if (type === 'kid') {
+                    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.6, 16, 16), new THREE.MeshStandardMaterial({color: 0x5d4037}));
+                    hair.position.set(0, 2.0, 0.3); hair.scale.set(1, 0.5, 1);
+                    group.add(hair);
+                } else if (type === 'dog') {
+                    const ear = new THREE.SphereGeometry(0.4, 16, 16);
+                    const eL = new THREE.Mesh(ear, mat); eL.position.set(-0.7, 1.8, 0.3);
+                    const eR = new THREE.Mesh(ear, mat); eR.position.set(0.7, 1.8, 0.3);
+                    group.add(eL, eR);
+                }
+
+                group.position.set(x, 1, z);
+                group.scale.set(scale, scale, scale);
+                group.lookAt(0, 1, 0);
+                return group;
+            }
+
+            // Positions (Far from table)
+            pets.push(createChar('cat', 0xffcc99, -7, 5));     // Pastel Orange Cat
+            pets.push(createChar('dog', 0xb2e2f2, 7, 5));      // Baby Blue Dog
+            pets.push(createChar('cat', 0x555555, -4, 8.5));   // Charcoal Cat
+            pets.push(createChar('kid', 0xfff9c4, 4, 8.5, 0.7)); // Small Kid
+            pets.push(createChar('human', 0xffdbac, 0, -8, 1.2)); // Friend Standing
+
+            pets.forEach(p => mainGroup.add(p));
+
+            camera.position.set(0, 14, 25);
+            camera.lookAt(0, 0, 0);
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            mainGroup.rotation.y += 0.003;
+            const time = Date.now() * 0.005;
+            pets.forEach((p, i) => {
+                p.position.y = 1.2 + Math.sin(time + i) * 0.25;
+            });
+            renderer.render(scene, camera);
+        }
+
+        // Logic for "Leave the party i got you !"
+        function exitParty() {
+            // Animals give one final big jump!
+            pets.forEach(p => { p.position.y += 4; });
+            
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('final-msg').style.display = 'flex';
+                document.body.style.opacity = '1';
+                document.body.style.background = 'white';
+            }, 1200);
+        }
+
+        window.addEventListener('mousedown', () => {
+            pets.forEach(p => { p.position.y += 2.5; setTimeout(() => p.position.y -= 2.5, 150); });
+        });
+
+        init();
+    </script>
+</body>
+</html>
