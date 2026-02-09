@@ -3,7 +3,7 @@
 <head>
     <title>The Secret Feast 🐾</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #f6d1ec; font-family: 'Segoe UI', cursive, sans-serif; transition: opacity 1.2s; }
+        body { margin: 0; overflow: hidden; background: #fff5f8; font-family: 'Segoe UI', cursive, sans-serif; transition: opacity 1.2s; }
         
         #ui-top {
             position: absolute; top: 20px; width: 100%; text-align: center;
@@ -21,13 +21,12 @@
             position: absolute; bottom: 40px; width: 100%; text-align: center; z-index: 200;
         }
 
-        /* Deep Pink Styling for Buttons */
         .leave-btn {
             padding: 15px 40px; border: none; border-radius: 50px; 
             background: #ff1493; color: white; font-weight: bold; font-size: 1.1rem;
             cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
         }
-        .leave-btn:hover { transform: scale(1.1); background: #c71585; box-shadow: 0 6px 20px rgba(255, 20, 147, 0.5); }
+        .leave-btn:hover { transform: scale(1.1); background: #c71585; }
 
         #final-msg {
             position: fixed; inset: 0; background: white; display: none; 
@@ -45,14 +44,14 @@
     </div>
 
     <div class="btn-container">
-        <button class="leave-btn" onclick="exitParty()">Leave the party i got you !</button>
+        <button class="leave-btn" onclick="exitParty()">Leave this party ! I got your wish !</button>
     </div>
 
     <div id="final-msg">Party Session Ended. <br> Have a beautiful birthday! ✨</div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        let scene, camera, renderer, mainGroup, pets = [];
+        let scene, camera, renderer, mainGroup, pets = [], sparkles = [];
 
         function init() {
             scene = new THREE.Scene();
@@ -62,7 +61,7 @@
             document.body.appendChild(renderer.domElement);
 
             scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-            const light = new THREE.PointLight(0xffffff, 0.8);
+            const light = new THREE.PointLight(0xffffff, 1);
             light.position.set(5, 15, 10);
             scene.add(light);
 
@@ -86,25 +85,30 @@
             cake.position.set(0, 2.3, 0); 
             mainGroup.add(cake);
 
+            // SPARKLE GENERATOR
+            for (let i = 0; i < 100; i++) {
+                const sparkleGeo = new THREE.SphereGeometry(0.05, 8, 8);
+                const sparkleMat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0xffffff : 0xff69b4 });
+                const sparkle = new THREE.Mesh(sparkleGeo, sparkleMat);
+                resetSparkle(sparkle);
+                scene.add(sparkle);
+                sparkles.push(sparkle);
+            }
+
             function createChar(type, color, x, z, scale = 1) {
                 const group = new THREE.Group();
                 const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6 });
-                
                 const body = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), mat);
                 group.add(body);
-
                 const head = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 32), mat);
                 head.position.set(0, 1.3, 0.3);
                 group.add(head);
 
-                // Big Cartoon Eyes
                 [-0.35, 0.35].forEach(posX => {
                     const ew = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), new THREE.MeshBasicMaterial({color: 0xffffff}));
-                    ew.position.set(posX, 1.4, 1.2);
-                    group.add(ew);
+                    ew.position.set(posX, 1.4, 1.2); group.add(ew);
                     const ep = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), new THREE.MeshBasicMaterial({color: 0x000000}));
-                    ep.position.set(posX, 1.4, 1.35);
-                    group.add(ep);
+                    ep.position.set(posX, 1.4, 1.35); group.add(ep);
                 });
 
                 if (type === 'cat') {
@@ -129,12 +133,11 @@
                 return group;
             }
 
-            // Positions (Far from table)
-            pets.push(createChar('cat', 0xffcc99, -7, 5));     // Pastel Orange Cat
-            pets.push(createChar('dog', 0xb2e2f2, 7, 5));      // Baby Blue Dog
-            pets.push(createChar('cat', 0x555555, -4, 8.5));   // Charcoal Cat
-            pets.push(createChar('kid', 0xfff9c4, 4, 8.5, 0.7)); // Small Kid
-            pets.push(createChar('human', 0xffdbac, 0, -8, 1.2)); // Friend Standing
+            pets.push(createChar('cat', 0xffcc99, -7, 5));
+            pets.push(createChar('dog', 0xb2e2f2, 7, 5));
+            pets.push(createChar('cat', 0x555555, -4, 8.5));
+            pets.push(createChar('kid', 0xfff9c4, 4, 8.5, 0.7));
+            pets.push(createChar('human', 0xffdbac, 0, -8, 1.2));
 
             pets.forEach(p => mainGroup.add(p));
 
@@ -143,28 +146,48 @@
             animate();
         }
 
+        function resetSparkle(s) {
+            s.position.set(Math.random() * 30 - 15, 20 + Math.random() * 10, Math.random() * 20 - 10);
+            s.userData.speed = 0.05 + Math.random() * 0.1;
+        }
+
         function animate() {
             requestAnimationFrame(animate);
             mainGroup.rotation.y += 0.003;
-            const time = Date.now() * 0.005;
-            pets.forEach((p, i) => {
-                p.position.y = 1.2 + Math.sin(time + i) * 0.25;
+            
+            // Sparkle Animation
+            sparkles.forEach(s => {
+                s.position.y -= s.userData.speed;
+                if (s.position.y < -5) resetSparkle(s);
             });
+
+            // Pet Bobbing
+            pets.forEach((p, i) => {
+                p.position.y = 1.2 + Math.sin(Date.now() * 0.005 + i) * 0.25;
+            });
+
             renderer.render(scene, camera);
         }
 
-        // Logic for "Leave the party i got you !"
-        function exitParty() {
-            // Animals give one final big jump!
-            pets.forEach(p => { p.position.y += 4; });
-            
-            document.body.style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('final-msg').style.display = 'flex';
-                document.body.style.opacity = '1';
-                document.body.style.background = 'white';
-            }, 1200);
-        }
+       function exitParty() {
+    // 1. The WhatsApp part
+    const phoneNumber = "919490563425"; // Example: 919876543210 (91 is India's code)
+    const message = encodeURIComponent("I got the message! That was a beautiful party. Thank you! ❤️");
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    
+    // Open WhatsApp in a new tab
+    window.open(whatsappUrl, '_blank');
+
+    // 2. The Visual Exit part (from our previous steps)
+    pets.forEach(p => { p.position.y += 10; }); // MEGA JUMP
+    document.body.style.opacity = '0';
+    
+    setTimeout(() => {
+        document.getElementById('final-msg').style.display = 'flex';
+        document.body.style.opacity = '1';
+        document.body.style.background = 'white';
+    }, 1200);
+}
 
         window.addEventListener('mousedown', () => {
             pets.forEach(p => { p.position.y += 2.5; setTimeout(() => p.position.y -= 2.5, 150); });
