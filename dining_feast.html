@@ -40,11 +40,11 @@
     <div id="ui-top">The Party is On! 🐾</div>
     
     <div id="personal-note">
-        "I tried to make it puppies and cats but it is changed... <br> hope you still like these squishy friends!"
+        "I tried to make it puppies and cats but it changed... <br> hope you still like these squishy friends!"
     </div>
 
     <div class="btn-container">
-        <button class="leave-btn" onclick="exitParty()">Leave this party ! I got your wish !</button>
+        <button class="leave-btn" onclick="exitParty()">Leave this party 🎉</button>
     </div>
 
     <div id="final-msg">Party Session Ended. <br> Have a beautiful birthday! ✨</div>
@@ -68,16 +68,17 @@
             mainGroup = new THREE.Group();
             scene.add(mainGroup);
 
-            // TABLE & CLOTH
             const tableGeo = new THREE.CylinderGeometry(4.5, 4.5, 0.5, 32);
             const tableTop = new THREE.Mesh(tableGeo, new THREE.MeshStandardMaterial({ color: 0xffffff }));
             mainGroup.add(tableTop);
 
-            const cloth = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.6, 0.2, 32), new THREE.MeshStandardMaterial({ color: 0xffd1dc }));
+            const cloth = new THREE.Mesh(
+                new THREE.CylinderGeometry(4.6, 4.6, 0.2, 32),
+                new THREE.MeshStandardMaterial({ color: 0xffd1dc })
+            );
             cloth.position.y = 0.3;
             mainGroup.add(cloth);
 
-            // CAKE
             const loader = new THREE.TextureLoader();
             const cakeMap = loader.load('https://img.icons8.com/plasticine/200/birthday-cake.png');
             const cake = new THREE.Sprite(new THREE.SpriteMaterial({ map: cakeMap }));
@@ -85,7 +86,6 @@
             cake.position.set(0, 2.3, 0); 
             mainGroup.add(cake);
 
-            // SPARKLE GENERATOR
             for (let i = 0; i < 100; i++) {
                 const sparkleGeo = new THREE.SphereGeometry(0.05, 8, 8);
                 const sparkleMat = new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0xffffff : 0xff69b4 });
@@ -98,32 +98,39 @@
             function createChar(type, color, x, z, scale = 1) {
                 const group = new THREE.Group();
                 const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6 });
+
                 const body = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), mat);
                 group.add(body);
+
                 const head = new THREE.Mesh(new THREE.SphereGeometry(1.0, 32, 32), mat);
                 head.position.set(0, 1.3, 0.3);
                 group.add(head);
 
                 [-0.35, 0.35].forEach(posX => {
-                    const ew = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), new THREE.MeshBasicMaterial({color: 0xffffff}));
-                    ew.position.set(posX, 1.4, 1.2); group.add(ew);
-                    const ep = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), new THREE.MeshBasicMaterial({color: 0x000000}));
-                    ep.position.set(posX, 1.4, 1.35); group.add(ep);
+                    const ew = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16),
+                        new THREE.MeshBasicMaterial({color: 0xffffff}));
+                    ew.position.set(posX, 1.4, 1.2);
+                    group.add(ew);
+
+                    const ep = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16),
+                        new THREE.MeshBasicMaterial({color: 0x000000}));
+                    ep.position.set(posX, 1.4, 1.35);
+                    group.add(ep);
                 });
 
                 if (type === 'cat') {
-                    const ear = new THREE.ConeGeometry(0.4, 0.8, 4);
-                    const eL = new THREE.Mesh(ear, mat); eL.position.set(-0.7, 2.0, 0.3);
-                    const eR = new THREE.Mesh(ear, mat); eR.position.set(0.7, 2.0, 0.3);
+                    const earGeo = new THREE.ConeGeometry(0.4, 0.8, 4);
+                    const eL = new THREE.Mesh(earGeo, mat);
+                    eL.position.set(-0.7, 2.0, 0.3);
+                    const eR = new THREE.Mesh(earGeo, mat);
+                    eR.position.set(0.7, 2.0, 0.3);
                     group.add(eL, eR);
-                } else if (type === 'kid') {
-                    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.6, 16, 16), new THREE.MeshStandardMaterial({color: 0x5d4037}));
-                    hair.position.set(0, 2.0, 0.3); hair.scale.set(1, 0.5, 1);
-                    group.add(hair);
                 } else if (type === 'dog') {
-                    const ear = new THREE.SphereGeometry(0.4, 16, 16);
-                    const eL = new THREE.Mesh(ear, mat); eL.position.set(-0.7, 1.8, 0.3);
-                    const eR = new THREE.Mesh(ear, mat); eR.position.set(0.7, 1.8, 0.3);
+                    const earGeo = new THREE.SphereGeometry(0.4, 16, 16);
+                    const eL = new THREE.Mesh(earGeo, mat);
+                    eL.position.set(-0.7, 1.8, 0.3);
+                    const eR = new THREE.Mesh(earGeo, mat);
+                    eR.position.set(0.7, 1.8, 0.3);
                     group.add(eL, eR);
                 }
 
@@ -136,13 +143,14 @@
             pets.push(createChar('cat', 0xffcc99, -7, 5));
             pets.push(createChar('dog', 0xb2e2f2, 7, 5));
             pets.push(createChar('cat', 0x555555, -4, 8.5));
-            pets.push(createChar('kid', 0xfff9c4, 4, 8.5, 0.7));
-            pets.push(createChar('human', 0xffdbac, 0, -8, 1.2));
+            pets.push(createChar('cat', 0xfff9c4, 4, 8.5, 0.7));
+            pets.push(createChar('dog', 0xffdbac, 0, -8, 1.2));
 
             pets.forEach(p => mainGroup.add(p));
 
             camera.position.set(0, 14, 25);
             camera.lookAt(0, 0, 0);
+
             animate();
         }
 
@@ -153,15 +161,14 @@
 
         function animate() {
             requestAnimationFrame(animate);
+
             mainGroup.rotation.y += 0.003;
-            
-            // Sparkle Animation
+
             sparkles.forEach(s => {
                 s.position.y -= s.userData.speed;
                 if (s.position.y < -5) resetSparkle(s);
             });
 
-            // Pet Bobbing
             pets.forEach((p, i) => {
                 p.position.y = 1.2 + Math.sin(Date.now() * 0.005 + i) * 0.25;
             });
@@ -169,33 +176,25 @@
             renderer.render(scene, camera);
         }
 
-       function exitParty() {
-    // 1. The WhatsApp part
-    const phoneNumber = "919490563425"; // Example: 919876543210 (91 is India's code)
-   const message = encodeURIComponent("I got the message! That was a beautiful party, thank you! { Now go back to the website! I pre-filled this message just to get confirmation that you actually looked at the whole thing, HAHA! :) }");
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-    
-    // Open WhatsApp in a new tab
-    window.open(whatsappUrl, '_blank');
-
-    // 2. The Visual Exit part (from our previous steps)
-    pets.forEach(p => { p.position.y += 10; }); // MEGA JUMP
-    document.body.style.opacity = '0';
-    
-    setTimeout(() => {
-        document.getElementById('final-msg').style.display = 'flex';
-        document.body.style.opacity = '1';
-        document.body.style.background = 'white';
-    }, 1200);
-}
+        function exitParty() {
+            pets.forEach(p => { p.position.y += 10; });
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                document.getElementById('final-msg').style.display = 'flex';
+                document.body.style.opacity = '1';
+                document.body.style.background = 'white';
+            }, 1200);
+        }
 
         window.addEventListener('mousedown', () => {
-            pets.forEach(p => { p.position.y += 2.5; setTimeout(() => p.position.y -= 2.5, 150); });
+            pets.forEach(p => {
+                p.position.y += 2.5;
+                setTimeout(() => p.position.y -= 2.5, 150);
+            });
         });
 
         init();
     </script>
 </body>
 </html>
-
-
